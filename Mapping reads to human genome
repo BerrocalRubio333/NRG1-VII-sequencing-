@@ -1,0 +1,52 @@
+#!/bin/bash
+#SBATCH --partition="physical"
+#SBATCH --nodes=1
+#SBATCH --account="punim1739"
+#SBATCH --ntasks=1
+#SBATCH --mail-type=FAIL
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-user=mberrocal@student.unimelb.edu.au
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=32000
+#time in days-hours:mins:sec
+#SBATCH --time=0-08:05:00
+
+module load gcccore/11.2.0
+module load  minimap2/2.22 
+
+#### P -> pass reads 2422438 
+fastq_b86="/data/gpfs/projects/punim1739/AmpliconNRG1/fastq_pass/barcode86/barcode86.fastq.gz"
+fastq_b87="/data/gpfs/projects/punim1739/AmpliconNRG1/fastq_pass/barcode87/barcode87.fastq.gz"
+fastq_b88="/data/gpfs/projects/punim1739/AmpliconNRG1/fastq_pass/barcode88/barcode88.fastq.gz"
+fastq_b89="/data/gpfs/projects/punim1739/AmpliconNRG1/fastq_pass/barcode89/barcode89.fastq.gz"
+fastq_b90="/data/gpfs/projects/punim1739/AmpliconNRG1/fastq_pass/barcode90/barcode90.fastq.gz"
+fastq_b91="/data/gpfs/projects/punim1739/AmpliconNRG1/fastq_pass/barcode91/barcode91.fastq.gz"
+
+#Genome file
+genome="/data/gpfs/projects/punim1739/hg38.fa"
+
+#map genome
+#minimap2 -ax splice -uf -k14 ${genome} ${fastq} > Indx_Genome_3.5.2.sam
+#Mapp trans
+minimap2 -ax splice --splice-flank=yes ${genome} ${fastq_b86} > barcode86_H2_iMACs_alpha_2.sam
+minimap2 -ax splice --splice-flank=yes ${genome} ${fastq_b87} > barcode87_H3_Monocytes_alpha_2.sam
+minimap2 -ax splice --splice-flank=yes ${genome} ${fastq_b88} > barcode88_H4_MDMs_alpha_2.sam
+minimap2 -ax splice --splice-flank=yes ${genome} ${fastq_b89} > barcode89_H5_Progenitors_beta_3.sam
+minimap2 -ax splice --splice-flank=yes ${genome} ${fastq_b90} > barcode90_H6_iMACs_beta_3.sam
+minimap2 -ax splice --splice-flank=yes ${genome} ${fastq_b91} > barcode91_H7_Monocytes_beta_3.sam
+
+echo "Mapping complete"
+module load gcccore/10.3.0
+module load  samtools/1.13
+
+#samtools preperate transcriptome
+for f in *.sam
+do
+samtools view -S -b $f > "${f%%.*}".bam
+samtools flagstat "${f%%.*}".bam > "${f%%.*}".txt
+samtools sort "${f%%.*}".bam -o "${f%%.*}".sorted.bam
+samtools index "${f%%.*}".sorted.bam
+done
+
+echo "complete"
