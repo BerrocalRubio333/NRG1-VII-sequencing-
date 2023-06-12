@@ -15,7 +15,7 @@
 module load gcccore/11.2.0
 module load  minimap2/2.22 
 
-#### P -> pass reads 2422438 
+#### pass reads
 fastq_b86="/data/gpfs/projects/punim1739/AmpliconNRG1/fastq_pass/barcode86/barcode86.fastq.gz"
 fastq_b87="/data/gpfs/projects/punim1739/AmpliconNRG1/fastq_pass/barcode87/barcode87.fastq.gz"
 fastq_b88="/data/gpfs/projects/punim1739/AmpliconNRG1/fastq_pass/barcode88/barcode88.fastq.gz"
@@ -40,7 +40,8 @@ echo "Mapping complete"
 module load gcccore/10.3.0
 module load  samtools/1.13
 
-#samtools preperate transcriptome
+#Convert sam to bam 
+# generate summary stats file 
 for f in *.sam
 do
 samtools view -S -b $f > "${f%%.*}".bam
